@@ -1,0 +1,51 @@
+#!/bin/bash
+set -e
+
+# Define the path to the virtual environment
+VENV_PATH="/usr/local/platform/venv"
+
+# Create the virtual environment if it doesn't exist
+if [ ! -d "$VENV_PATH" ]; then
+    echo "Creating virtual environment in /usr/local/platform/venv..."
+    python3 -m venv "$VENV_PATH"
+fi
+
+# Install bless in the virtual environment
+echo "Installing bless in the virtual environment..."
+"$VENV_PATH/bin/pip" install -r /usr/local/platform/requirements.txt
+
+# Create a dedicated system user for the service if it doesn't already exist
+if ! id -u platform >/dev/null 2>&1; then
+    echo "Creating platform system user..."
+    useradd --system --no-create-home --group nogroup platform
+fi
+
+# Add the platform user to the bluetooth group
+if groups platform | grep &>/dev/null '\bbluetooth\b'; then
+    echo "platform is already in the bluetooth group."
+else
+    echo "Adding platform to the bluetooth group..."
+    usermod -aG bluetooth platform
+fi
+
+# Ensure correct permissions on the server script directory
+echo "Setting ownership of /usr/local/platform to platform user..."
+chown -R platform:bluetooth /usr/local/platform
+
+# Make sure run.py is executable
+echo "Making sure /usr/local/platform/run.py is executable..."
+chmod +x /usr/local/platform/run.py
+
+# Reload systemd to pick up new service
+echo "Reloading systemd daemon..."
+systemctl daemon-reload
+
+# Enable the service to start on boot
+echo "Enabling platform.service..."
+systemctl enable platform.service
+
+# Start the service immediately
+echo "Starting platform.service..."
+systemctl start platform.service
+
+echo "Postinstall script complete."

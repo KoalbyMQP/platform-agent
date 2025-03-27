@@ -1,0 +1,6 @@
+Package: platform
+Version: 0.1
+Architecture: all
+Maintainer: Skyler Wiernik <skylerwiernik@gmail.com>
+Description: Platform for 24-25 Ava & Finely MQP.
+Depends: python3, python3-pip

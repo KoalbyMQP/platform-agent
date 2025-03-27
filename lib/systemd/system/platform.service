@@ -1,0 +1,14 @@
+[Unit]
+Description=Cyberonics device control service
+After=network.target
+
+[Service]
+ExecStart=/usr/local/platform/venv/bin/python /usr/local/platform/run.py
+WorkingDirectory=/usr/local/platform
+Restart=always
+User=platform
+Group=bluetooth
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target
